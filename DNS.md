@@ -38,18 +38,18 @@ Procházením stromu se snažíme z hran sestavit co nejbližší IP adresu zada
 
 FindPop(tree, ecs)
 
-int[] ip <- ecs v 16 soustave
-int ipLength <- 0
-(int, int) bestPop
-node <- root
-edge <- node.edges[ip[ipLength]]
-while edge != null or ipLength + edge.Length > ecs.Length
-	if ip[ipLength:] contains edge
-		node <- edge.node
-		ipLength <- ipLength + edge.Length
-		edge <- node.edges[ip[ipLength]]
-		if node has pop:
-			bestPop <- pop
-	else:
-		break
-return bestPop
+	int[] ip <- ecs v 16 soustave
+	int ipLength <- 0	
+	(int, int) bestPop
+	node <- root
+	edge <- node.edges[ip[ipLength]]
+	while edge != null or ipLength + edge.Length > ecs.Length
+		if ip[ipLength:] contains edge
+			node <- edge.node
+			ipLength <- ipLength + edge.Length
+			edge <- node.edges[ip[ipLength]]
+			if node has pop:
+				bestPop <- pop
+		else:
+			break
+	return bestPop
