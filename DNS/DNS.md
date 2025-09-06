@@ -39,8 +39,6 @@ Scope prefix length nemusí být velikosti nibblů, což mi dost rozhodilo můj 
 
 * Druhá možnost byla zanevřít nad krásnou a kompaktní reprezentací hran v šestnáctkové soustavě a větvit strom prostě podle největší shody po bitech. Ve worst case se mi ze stromu stane binární strom o hloubce 128. Počet vrcholů to ale moc neovlivní a celkový performance zůstane víceméně stejný. Celková složitost bude pořád v O(1) vůči velikosti dat, protože strom má omezenou hloubku 128.
 
-Kód jsem psala v C#, protože se v něm orientuji nejlépe. Práce s jednotlivými bity zde není tak pohodlná, jak u více low-level jazyků, takže paměťová náročnost je v této implementaci o hodně horší než v teorii.
-
 ### Node
 
 Každý node obsahuje pointer na dvě hrany, jejichž hodnoty začínají na 0 a na 1.
@@ -51,7 +49,7 @@ Jelikož ke každé dvojici (subnet, Pop) je přiřazena jediná IP adresa, nemy
 
 ### Hrana
 
-Hrany obsahují BitArray, kde je uložen nejdelší společný prefix adres.  Pak hrana obsahuje pointer na node, ke kterému vede. Strom se nebude procházet směrem nahoru, je tedy zbytečné držet si oba konce.
+Hrany obsahují pole boolů, kde je uložen nejdelší společný prefix adres.  Pak hrana obsahuje pointer na node, ke kterému vede. Strom se nebude procházet směrem nahoru, je tedy zbytečné držet si oba konce.
 
 ### Prohledávání stromu
 
@@ -89,6 +87,6 @@ První mě napadlo dělit adresy podle hex charů a mít prefixový strom o hlou
 
 Dlouho jsem se pokoušela nějak nacpat ty nehezké scope-prefixy do mého promyšleného a hotového stromu, pak jsem to vzdala a přešla k prefixovému binárnímu stromu. Ohledně časové a paměťové složitosti jsou všechny možnosti, nad kterými jsem uvažovala, prašť jak uhoď. Pokud někde ušetřím na počtu vrcholů a hran, pak se mi to vrátí třeba v nevyužitých prvcích hashovacího pole, nebo nějakým jiným způsobem.
 
-Samotný kód nebyl úplně rychlá záležitost, měla jsem problém s tím, jak efektivně uložit data v šestnáctkové soustavě. Použití stringu by bylo paměťově neúsporné, pole intů taky, protože int má vždy minimálně bajt a jeden hex charakter se vejde do nibblu. Po googlení jsem nakonec přistála na bitarray, který využije všechnu alokovanou paměť. Nikdy jsem ho nepoužívala, ani jsem v praxi nepoužívala bit shifty, takže to mě trošku zpomalilo.
+Samotný kód nebyl úplně rychlá záležitost, měla jsem problém s tím, jak efektivně uložit data v šestnáctkové soustavě. Použití stringu by bylo paměťově neúsporné, pole intů taky, protože int má vždy minimálně bajt a jeden hex charakter se vejde do nibblu. Po googlení jsem nakonec přistála na bitarray, který údajně využije všechnu alokovanou paměť. Nikdy jsem ho nepoužívala, ani jsem v praxi nepoužívala bit shifty, takže to mě trošku zpomalilo. Při debugování jsem zjistila, že bitarray má automaticky velikost 32 bitů a vůbec není na tento úkol vhodný. Nakonec jsem tedy skončila u klasického pole boolů, i když to rozhodně není ideální řešení. Pro lépe alokovanou pamět by se slušilo změnit jazyk na nějaký více low-level. Myslím ale, že myšlenka je předána i takto.
 
 Nejtěžší mi přišlo se zorientovat ve všech pojmech, samotný úkol už pak nebyl tak těžký. Odhadem bych řekla, že mi to mohlo zabrat cca 3 dny.
