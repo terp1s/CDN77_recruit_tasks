@@ -25,6 +25,8 @@ Přidejte hlavičku X-Cache-Key, jejímž obsahem bude vypočítaný výše nale
 
 ## 2. Řešení
 
+Zvolila jsem cestu přes NJS modul, který se nachází [zde](hash.js) a to, jak by vypadal reverse proxy nginx server .config soubor [zde](nginx_config.txt). Vlastně tady moc nevím co okomentovat, kód je na pár řádků a (alespoň u mě) funkční.
+
 ## 3. Zadání
 
 Navrhněte algoritmus řešící vyhodnocování DNS wildcard záznamů s nejhůře konstantní časovou složitostí vzhledem k počtu uložených záznamů. Předpokládejme, že záznamy máme k dispozici rozparsované v libovolné standardní datové struktuře (array, set, hashmap, tree, heap) dle našeho uvážení a čas nutný k parsování zanedbáme.
@@ -65,4 +67,13 @@ pseudokód:
 
 Je otázka, zda mít jeden strom pro všechny typy records, nebo pro každý typ zvlášť. Oddělení by bylo přehlednější z lidského hlediska, z hlediska počítače je to, myslím, jedno. Prohledávání funguje v O(n), ovšem vzhledem k délce dotazu, ne počtu záznamů, takže dělení mezi menší stromy je spíše estetický tah.
 
-Pokud by se toto nepovažovalo za klasickou strukturu, podle mě by vlastně stačilo mít jeden velký hashset se všemi wildcards a postupně zleva ukrajovat zadanému záznamu a tento zbytek hledat v setu. Toto by však bylo extrémně paměťově neúsporné. Časově by to sice bylo konstantní vzhledem k počtu záznamů, počítání hashe pro každý substring také není ideální. Dalo by se tomu předejít, pokud by se hash skládala z hashů jednotlivých labelů a místo počítání hashe dotazovaného záznamu pro každý počet labelů zvlášť by se jenom ukrajovalo od celkové hashe.
+Pokud by se toto nepovažovalo za klasickou strukturu, podle mě by vlastně stačilo mít jeden velký hashset se všemi wildcards a postupně zleva ukrajovat zadanému záznamu a tento zbytek hledat v setu. Toto by však bylo extrémně paměťově neúsporné. Časově by to sice bylo konstantní vzhledem k počtu záznamů, počítání hashe pro každý substring také není ideální. Dalo by se tomu předejít, pokud by se hash pro celý záznam skládala z hashů jednotlivých labelů a místo počítání hashe dotazovaného záznamu pro každý počet labelů zvlášť by se jenom ukrajovalo od jeho celkové hashe.
+
+
+## Moje časová složitost a myšlenky
+
+Tento úkol mi zabral cca 2 celé dny + odhadem půl dne, který jsem tak příležitostně strávila teorií. Většinu času jsem strávila nad tím, abych si u sebe rozchodila vlastní server a nějak se s ním naučila zacházet. Původně jsem doufala, že úkoly budu moct vyřešit i bez vlastního serveru, hned u prvního úkolu mi ale šlo proti srsti psát o něčem, co nemam osahané.
+
+U druhého úkolu jsem se zasekla na hodně dlouho, tak jsem radši šla na třetí, který byl celkem triviální, do hodiny to klidně mohlo být vymyšlené i sepsané. 
+
+Pak jsem se vrátila ke zjišťování, jak do mého serveru vlastně přidat logiku. Nakonec jsem skončila u napsání modulu v NJS, i přesto, že jsem se odvážně chvíli pokoušela napsat modul v C. Každý tutorial, který jsem viděla, měl na začátku varování, že to je hodně hardcore, tak jsem radši šla hledat cestu menšího odporu. NJS se dá použít údajně pouze s Linuxem, takže jsem se ještě musela přepnout na něj, abych úkol dokončila. Všechno toto obsahovalo spoustu slepých cest, takže mi úkol zabral asi nejvíce času, rozhodně více než den.

@@ -1,0 +1,10 @@
+server {
+        listen      8000;
+        server_name _ localhost 127.0.0.1;
+        js_import hash from /etc/nginx/hash.js;
+
+        location / {
+            proxy_pass http://127.0.0.1:80/;  
+            js_header_filter hash.AddHash; 
+        }
+    }
