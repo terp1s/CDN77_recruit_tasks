@@ -1,27 +1,59 @@
+class IPTrie
+{
+    public IPNode Root;
+}
+class IPEdge
+{
+    public int Length => Data.Length;
+    public bool[] Data;
+    public IPNode End;
+}
+class IPNode
+{
+    public (int, int)? Pop;
+    public IPEdge ZeroChild { get; set; }
+    public IPEdge OneChild { get; set; }
+
+    public IPEdge GetEdge(bool b)
+    {
+        if (b)
+        {
+            return OneChild;
+        }
+
+        return ZeroChild;
+    }
+}
+class Ecs
+{
+    public int ScopePrefixLength;
+    public bool[] IPAddress { get; set; }
+}
 class DNS
 {
-    public (int, int)? PopLookup(string ecs, IPTrie routing_data)
+    public static (int, int)? PopLookup(Ecs ecs, IPTrie routing_data)
     {
-        BitArray ip = ParseIPv6ToBitArray(ecs);
-        int firstChar = BitsToInt(ip, 0);
+        bool[] ip = ecs.IPAddress;
         IPNode node = routing_data.Root;
-        IPEdge edge = node.Edges[firstChar];
+        IPEdge edge = node.GetEdge(ip[0]);
         int ipLength = 0;
-        (int, int)? bestPop = null;
+        int residue = ecs.ScopePrefixLength - ipLength;
+        (int, int)? bestPop = node.Pop;
 
-        while (edge != null)
+        while (edge != null && residue > edge.Length)
         {
-            firstChar = BitsToInt(ip, ipLength);
-
             if (EdgeInIP(edge, ip, ipLength))
             {
-                ipLength += edge.Length;
                 node = edge.End;
-                edge = node.Edges[firstChar];
-                if(node.Pop != null)
+                ipLength += edge.Length;
+                residue = ecs.ScopePrefixLength - ipLength;
+
+                if (node.Pop != null)
                 {
                     bestPop = node.Pop;
                 }
+
+                edge = node.GetEdge(ip[ipLength]);
             }
             else
             {
@@ -29,16 +61,20 @@ class DNS
             }
         }
 
+        if (edge != null && residue == edge.Length)
+        {
+            node = edge.End;
+            if (node.Pop != null)
+            {
+                bestPop = node.Pop;
+            }
+        }
+
         return bestPop;
     }
 
-    private static bool EdgeInIP(IPEdge edge, BitArray ip, int ipIndex)
+    public static bool EdgeInIP(IPEdge edge, bool[] ip, int ipIndex)
     {
-        if (ip.Length - ipIndex < edge.Length) //source prefix length < scope prefix length
-        {
-            return false;
-        }
-
         for (int i = 0; i < edge.Length; i++)
         {
             if (ip[ipIndex + i] != edge.Data[i])
@@ -48,21 +84,5 @@ class DNS
         }
 
         return true;
-    }
-    private static BitArray ParseIPv6ToBitArray(string ipv6)
-    {
-        var ip = IPAddress.Parse(ipv6);
-        byte[] bytes = ip.GetAddressBytes();
-        return new BitArray(bytes);
-    }
-    static int BitsToInt(BitArray bits, int start)
-    {
-        int value = 0;
-        for (int i = 0; i < 4; i++)
-        {
-            value <<= 1;
-            if (bits[start + i]) value |= 1;
-        }
-        return value;
     }
 }
