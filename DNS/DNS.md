@@ -15,7 +15,19 @@ Datová struktura v paměti serveru obsahuje tzv. routing data. Pro jednoduchost
 
 ## Řešení
 
-Jako datovou strukturu jsem zvolila upravený prefix tree. V klasickém prefix tree má každá hrana délku jednoho znaku. Z ukázky routing dat mi přišlo, že v prvním a druhém kvartetu je hodně kombinací charů a prefix tree dává ještě jakžtakž smysl, od třetího dál mi to už přišlo jako overkill. Pokud bychom zafixovali první dva kvartety, našli bychom ve spoustě případů pouze jednotky IP adres a ty by spolu nesdílely téměř nic. To znamená, že v klasickém prefixovém stromu bychom našli od hloubky cca 8 hodně větví, které se dále nerozvětvují, což by vedlo k zbytečným nodům a zabíraní paměti/zpomalování vyhledávání. Každá hrana místo jednoho charu uchovává libovolně dlouhý BitArray, který je nejdelší společný kus mezi IP adresami.
+Routingová data v podstatě popisují, jaká oblast adresního prostoru spadá pod který PoP. Jednotlivé oblasti jsou buď disjunktní, nebo se do sebe mohou vnořovat – větší síť může obsahovat více menších podsítí, případně se mohou objevit i zcela oddělené úseky.
+
+Úloha tedy spočívá v tom, že pro zadanou adresu musíme najít nejbližší (nejdelší) prefix, který tuto adresu zahrnuje. To přesně odpovídá principu prefixového stromu: postupně se pohybujeme po větvích stromu, přidáváme další bity adresy a tím se dostáváme k čím dál specifičtějším oblastem.
+
+Díky tomu je hledání nejvhodnějšího PoPu velmi intuitivní – cesta stromem přímo odpovídá cestě od obecnějších prefixů směrem k těm nejužším, které adresu pokrývají.
+
+V klasickém prefix tree má každá hrana délku jednoho znaku a stromem prochocházíme tak, že postupně z hran stavíme nějaký řetězec. Když jsem se ale podívala na ukázková routingová data, zjistila jsem, že v prvním a druhém kvartetu IPv6 adresy se vyskytuje hodně různých kombinací. V této části tedy prefix tree ještě dává smysl – větve se přirozeně větví a sdílí část adresy.
+
+Od třetího kvartetu dál je ale situace jiná. Pokud bychom po dvou kvartetech adresu „zafixovali“, dostali bychom ve většině případů jen několik málo adres, které už spolu téměř nic nesdílí. Strom by se v této části stal velmi řídkým.
+
+To by znamenalo, že od hloubky dvou kvartetů by v klasickém prefixovém stromu vzniklo mnoho větví, které se už dál nerozvětvují. Tyto zbytečné nody by jen zabíraly paměť a zpomalovaly vyhledávání.
+
+Proto jsem se rozhodla strom upravit tak, aby každá hrana neobsahovala jen jeden znak, ale rovnou libovolně dlouhý úsek bitů – tedy nejdelší společný prefix mezi IP adresami.
 
 Lineární větve se stále mohou ve stromu nacházet, pokud se v routing datech nachází dva a více identických řádků s jiným scope prefix-length, například 
 
